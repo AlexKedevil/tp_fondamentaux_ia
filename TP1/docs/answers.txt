@@ -1,0 +1,80 @@
+TP1 — Les fondamentaux de l’IA
+Analyse d’un algorithme en fonctionnement (dataset Iris)
+
+Ce fichier regroupe les réponses aux questions du TP, copiées depuis le notebook.
+
+============================================================
+ÉTAPE 1 — Charger les données : le dataset Iris
+============================================================
+Q1. Combien d’échantillons par classe ? Le dataset est-il équilibré ?
+R. Chaque classe a 50 échantillons (setosa, versicolor, virginica) → le dataset est parfaitement équilibré.
+
+Q2. Y a-t-il des valeurs manquantes ?
+R. Non : 0 valeur manquante.
+
+Q3. Quelles variables semblent a priori les plus discriminantes ?
+R. À l’œil (via le pairplot), petal_length et petal_width séparent le mieux les espèces.
+
+Q4. Certaines paires de variables permettent-elles de séparer visuellement les 3 espèces ? Lesquelles ?
+R. Oui : les paires impliquant petal_length et/ou petal_width montrent la meilleure séparabilité ; setosa est très bien séparée, et la confusion visuelle se situe surtout entre versicolor et virginica.
+
+============================================================
+ÉTAPE 2 — Entraîner un modèle : baseline + modèle principal
+============================================================
+Q. Pourquoi commencer par une baseline simple (Decision Tree) avant un modèle plus complexe (Random Forest) ?
+R. Une baseline sert de point de référence (sanity check) : elle est rapide, souvent interprétable, et permet de vérifier que le pipeline (pré-traitement, split, encodage, etc.) fonctionne. Ensuite, on peut juger si un modèle plus complexe apporte un gain réel (sinon, il est inutilement coûteux/opaque).
+
+============================================================
+ÉTAPE 3 — Évaluer les métriques
+============================================================
+Q1. Le Random Forest surpasse-t-il le Decision Tree ? Par quelle marge ?
+R. Dans cette exécution, non : le Decision Tree obtient 96,7% d’accuracy contre 93,3% pour le Random Forest, soit environ −3,3 points pour la forêt.
+
+Q2. Y a-t-il des espèces plus difficiles à classifier ? Pourquoi ?
+R. Oui : les erreurs proviennent surtout de la frontière entre versicolor et virginica (leurs mesures de pétales se recouvrent davantage). Setosa est quasiment toujours bien séparée.
+
+Q3. Quelle différence entre accuracy et F1-score ? Dans quel cas préférer l’un à l’autre ?
+R. L’accuracy mesure la proportion totale de prédictions correctes. Le F1-score combine precision et recall (il pénalise mieux les déséquilibres et les classes difficiles). On préfère souvent le F1 quand les classes sont déséquilibrées ou quand le coût des faux positifs/faux négatifs n’est pas symétrique.
+
+============================================================
+ÉTAPE 4 — Tuning des hyperparamètres et détection de l’overfitting
+============================================================
+Q1. À partir de quelle profondeur observe-t-on de l’overfitting (score train >> score test) ?
+R. On commence à voir un écart net dès max_depth ≈ 5 : le score d’entraînement devient beaucoup plus élevé que le score test (dans notre exécution, l’écart monte jusqu’à ~0,10).
+
+Q2. Quel nombre d’arbres offre le meilleur compromis performance / coût de calcul ?
+R. Ici, 10 arbres donne la meilleure accuracy moyenne en validation croisée (≈ 95,8%) et augmente peu le coût. Au-delà (25, 50, 100, …), le gain est nul voire marginal.
+
+Q3. Qu’apporte la validation croisée par rapport à un simple split train/test ?
+R. La validation croisée (k-fold) fournit une estimation plus robuste : on moyenne les performances sur plusieurs découpages, ce qui réduit la dépendance à un split « chanceux » ou « malchanceux ».
+
+============================================================
+ÉTAPE 5 — Explicabilité SHAP
+============================================================
+Q1. Quelle variable est la plus déterminante selon SHAP ? Est-ce cohérent avec votre intuition ?
+R. Globalement, petal_width (largeur du pétale) ressort comme la variable la plus influente, très proche de petal_length. Oui, c’est cohérent avec le pairplot : les variables de pétales séparent le mieux les espèces.
+
+Q2. Quelle différence entre l’importance sklearn (MDI) et l’importance SHAP ?
+R. L’importance MDI (sklearn) mesure une baisse moyenne d’impureté dans les arbres, mais peut être biaisée (corrélations, structure de l’arbre). SHAP attribue une contribution par variable pour chaque prédiction (explicabilité locale) et se moyenne ensuite pour une importance globale (plus proche d’une explication du modèle).
+
+Q3. Pourquoi l’explicabilité est-elle cruciale dans un contexte réglementé (médical, crédit bancaire) ?
+R. Parce qu’on doit justifier les décisions (audits, conformité), détecter les biais, et donner des raisons compréhensibles aux utilisateurs/clients. Sans explicabilité, on peut prendre des décisions à fort impact sans contrôle ni transparence.
+
+============================================================
+ÉTAPE 6 — Debrief : 3 insights clés (format imposé)
+============================================================
+Insight 1 — Performance
+Observation → Sur ce split, le Decision Tree (baseline) atteint 96,7% d’accuracy, contre 93,3% pour le Random Forest (paramètres du TP).
+Explication → Un modèle plus complexe n’est pas automatiquement meilleur : avec peu de données et des hyperparamètres non optimisés, la forêt peut ne pas exploiter son potentiel (et introduire de la variance).
+Implication pratique → Toujours comparer à une baseline ; si le gain est faible (ou négatif), simplifier le modèle ou faire du tuning avant de complexifier.
+
+Insight 2 — Overfitting / Généralisation
+Observation → À partir de max_depth ≈ 5, le score entraînement devient nettement supérieur au score test (écart jusqu’à ~0,10).
+Explication → L’overfitting apparaît quand le modèle apprend trop finement les particularités du train (bruit), ce qui dégrade la généralisation.
+Implication pratique → Contrôler la complexité (ex. max_depth), utiliser la validation croisée et choisir des hyperparamètres qui maximisent la performance hors-échantillon.
+
+Insight 3 — Explicabilité
+Observation → Le SHAP summary plot montre que petal_width (et très proche petal_length) domine l’influence globale des prédictions.
+Explication → C’est cohérent avec l’EDA : les variables liées au pétale séparent fortement les espèces, alors que sepal_width apporte peu d’information discriminante.
+Implication pratique → En contexte réglementé (médical, crédit), l’explicabilité est essentielle pour justifier une décision, auditer des biais et rendre le modèle acceptable.
+

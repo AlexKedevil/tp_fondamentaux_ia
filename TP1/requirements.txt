@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+shap
+tqdm
+ipywidgets
+jupyterlab_widgets
+widgetsnbextension
+jinja2
+
