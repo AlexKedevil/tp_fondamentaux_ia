@@ -1,0 +1,86 @@
+TP2 — Mini-projet IA : étude de cas appliquée (Cas A — Churn clients)
+Analyse d’un pipeline ML complet sur données réelles (IBM Telco Churn)
+
+Ce fichier regroupe les réponses aux questions du TP, copiées depuis le notebook.
+
+============================================================
+ÉTAPE 1 — Cadrage du projet
+============================================================
+Q1. Quel est le problème métier et le KPI visé ?
+R. Le problème est d'identifier les clients à risque de résiliation (churn) pour déclencher des actions de rétention ciblées. Les KPI sont le taux de churn mensuel, le taux de rétention après campagne et le revenu conservé (MRR sauvegardé).
+
+Q2. Quelle est la métrique ML principale et pourquoi ?
+R. Le F1-macro, car le dataset est déséquilibré (26,6% de churn) et on veut équilibrer la performance entre les classes churn et non-churn.
+
+Q3. Une erreur de type faux négatif ou faux positif est-elle plus coûteuse ?
+R. Le faux négatif (client réellement à risque mais non détecté) est le plus coûteux, car on perd un client sans action préventive.
+
+Q4. Quelles populations pourraient être discriminées si le modèle est biaisé ?
+R. Les seniors, les clients à faibles revenus (proxy via options/contrat) ou les clients digitalement moins actifs.
+
+============================================================
+ÉTAPE 2 — Préparation des données
+============================================================
+Q1. Le dataset est-il équilibré ?
+R. Non. Le churn est autour de 26,6% (classe minoritaire) et le non-churn autour de 73,4%.
+
+Q2. Y a-t-il des variables potentiellement sensibles ?
+R. Oui, par exemple SeniorCitizen. Il faut auditer l'impact sur l'équité par sous-groupes et documenter son usage.
+
+Q3. Quels prétraitements ont été appliqués ?
+R. Conversion de TotalCharges en numérique, suppression des valeurs manquantes, encodage one-hot des variables catégorielles, split stratifié (80/20) et normalisation (StandardScaler) pour stabiliser l'entraînement.
+
+============================================================
+ÉTAPE 3 — Entraîner et comparer des modèles
+============================================================
+Q1. Quel modèle obtient les meilleures performances sur votre cas ?
+R. Sur ce split, la Régression Logistique obtient la meilleure performance en F1-macro (0.739).
+
+Q2. La Régression Logistique est-elle compétitive malgré sa simplicité ?
+R. Oui, elle est même la meilleure ici, confirmant qu'un modèle simple peut très bien performer avec un bon prétraitement sur des données tabulaires.
+
+Q3. Quel modèle choisiriez-vous pour un déploiement en production ?
+R. La Régression Logistique : elle offre le meilleur compromis performance/interprétabilité/coût, avec un temps d'inférence très faible et une maintenance facilitée.
+
+============================================================
+ÉTAPE 4 — Évaluation approfondie
+============================================================
+Q1. Qu'indique la matrice de confusion ?
+R. Elle met en évidence les erreurs de prédiction. Dans le churn, les faux négatifs (clients non détectés) restent le point critique à surveiller.
+
+Q2. Pourquoi le faux négatif est-il le plus coûteux dans ce contexte ?
+R. Car il implique une perte directe de revenu et un coût d'acquisition futur élevé pour compenser le client perdu.
+
+Q3. Votre meilleur modèle est-il suffisant pour un déploiement réel ?
+R. Pas seul. Il nécessite une calibration des seuils, un suivi de la dérive des données (drift), un monitoring par segment et une validation métier continue.
+
+============================================================
+ÉTAPE 5 — Explicabilité SHAP
+============================================================
+Q1. Quelles sont les 3 variables les plus influentes selon SHAP ?
+R. 1. tenure (ancienneté), 2. InternetService_Fiber optic, 3. Contract_Two year.
+
+Q2. Ces variables sont-elles cohérentes avec votre intuition métier ?
+R. Oui. Une ancienneté élevée réduit souvent le churn, et le type de service ou de contrat influence fortement la fidélité.
+
+Q3. Si une variable sensible apparaît parmi les plus importantes, que faut-il faire ?
+R. Lancer une analyse de biais, tester des alternatives (exclusion ou contraintes d'équité), documenter la décision et renforcer la supervision humaine.
+
+============================================================
+ÉTAPE 6 — Conformité AI Act
+============================================================
+Q1. Quel est le niveau de risque selon l'AI Act ?
+R. Risque limité. Le système assiste la décision commerciale sans automatiser seul une décision juridique à fort impact.
+
+Q2. Votre système nécessite-t-il un audit de conformité avant déploiement ?
+R. Oui, un audit interne (conformité, sécurité, data governance) incluant le DPO et les équipes data/RSSI est recommandé.
+
+Q3. Quel organisme de contrôle surveille ce type de système en France ?
+R. La CNIL (Commission Nationale de l'Informatique et des Libertés) pour la protection des données.
+
+============================================================
+ÉTAPE 7 — Synthèse
+============================================================
+Modèle retenu : Régression Logistique
+Performance (F1-macro) : 0.739
+Limite principale : Le rappel de la classe churn est perfectible ; des faux négatifs subsistent, nécessitant une optimisation du seuil de décision.
