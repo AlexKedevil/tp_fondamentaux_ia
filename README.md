@@ -11,7 +11,7 @@ Depot des travaux pratiques du cours **Les fondamentaux de l'IA**.
 | TP3 | Deep Learning (Fashion-MNIST Zalando) | `TP3/notebook/TP3_Deep_Learning_Classification_Produits_Zalando.ipynb` | `TP3/docs/TP3.pdf` | `TP3/assets/` |
 
 Notes:
-- `TP1/docs/answers.txt` et `TP2/docs/answers.txt` contiennent les reponses textuelles complementaires.
+- `TP1/docs/answers.txt`, `TP2/docs/answers.txt` et `TP3/docs/answers.txt` contiennent les reponses textuelles complementaires.
 - Les figures sont generees automatiquement via **Run All** des notebooks.
 
 ## Execution locale (mode recommande)
